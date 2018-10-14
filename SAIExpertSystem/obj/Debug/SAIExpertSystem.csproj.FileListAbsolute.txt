@@ -1,0 +1,10 @@
+D:\romakv4\Documents\Visual Studio 2017\Projects\SAIExpertSystem\SAIExpertSystem\bin\Debug\SAIExpertSystem.exe.config
+D:\romakv4\Documents\Visual Studio 2017\Projects\SAIExpertSystem\SAIExpertSystem\bin\Debug\SAIExpertSystem.exe
+D:\romakv4\Documents\Visual Studio 2017\Projects\SAIExpertSystem\SAIExpertSystem\bin\Debug\SAIExpertSystem.pdb
+D:\romakv4\Documents\Visual Studio 2017\Projects\SAIExpertSystem\SAIExpertSystem\obj\Debug\SAIExpertSystem.csprojResolveAssemblyReference.cache
+D:\romakv4\Documents\Visual Studio 2017\Projects\SAIExpertSystem\SAIExpertSystem\obj\Debug\SAIExpertSystem.Form1.resources
+D:\romakv4\Documents\Visual Studio 2017\Projects\SAIExpertSystem\SAIExpertSystem\obj\Debug\SAIExpertSystem.Properties.Resources.resources
+D:\romakv4\Documents\Visual Studio 2017\Projects\SAIExpertSystem\SAIExpertSystem\obj\Debug\SAIExpertSystem.csproj.GenerateResource.cache
+D:\romakv4\Documents\Visual Studio 2017\Projects\SAIExpertSystem\SAIExpertSystem\obj\Debug\SAIExpertSystem.csproj.CoreCompileInputs.cache
+D:\romakv4\Documents\Visual Studio 2017\Projects\SAIExpertSystem\SAIExpertSystem\obj\Debug\SAIExpertSystem.exe
+D:\romakv4\Documents\Visual Studio 2017\Projects\SAIExpertSystem\SAIExpertSystem\obj\Debug\SAIExpertSystem.pdb
