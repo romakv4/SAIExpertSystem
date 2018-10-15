@@ -114,57 +114,57 @@
             // 
             // noButton
             // 
+            this.noButton.Enabled = false;
             this.noButton.Location = new System.Drawing.Point(329, 123);
             this.noButton.Name = "noButton";
             this.noButton.Size = new System.Drawing.Size(75, 23);
             this.noButton.TabIndex = 7;
             this.noButton.Text = "No";
             this.noButton.UseVisualStyleBackColor = true;
-            this.noButton.Visible = false;
             this.noButton.Click += new System.EventHandler(this.noButton_Click);
             // 
             // moreNoButton
             // 
+            this.moreNoButton.Enabled = false;
             this.moreNoButton.Location = new System.Drawing.Point(421, 123);
             this.moreNoButton.Name = "moreNoButton";
             this.moreNoButton.Size = new System.Drawing.Size(75, 23);
             this.moreNoButton.TabIndex = 8;
             this.moreNoButton.Text = "More no";
             this.moreNoButton.UseVisualStyleBackColor = true;
-            this.moreNoButton.Visible = false;
             this.moreNoButton.Click += new System.EventHandler(this.moreNoButton_Click);
             // 
             // dunnoButton
             // 
+            this.dunnoButton.Enabled = false;
             this.dunnoButton.Location = new System.Drawing.Point(521, 123);
             this.dunnoButton.Name = "dunnoButton";
             this.dunnoButton.Size = new System.Drawing.Size(75, 23);
             this.dunnoButton.TabIndex = 9;
             this.dunnoButton.Text = "I dunno";
             this.dunnoButton.UseVisualStyleBackColor = true;
-            this.dunnoButton.Visible = false;
             this.dunnoButton.Click += new System.EventHandler(this.dunnoButton_Click);
             // 
             // moreYesButton
             // 
+            this.moreYesButton.Enabled = false;
             this.moreYesButton.Location = new System.Drawing.Point(617, 123);
             this.moreYesButton.Name = "moreYesButton";
             this.moreYesButton.Size = new System.Drawing.Size(75, 23);
             this.moreYesButton.TabIndex = 10;
             this.moreYesButton.Text = "More yes";
             this.moreYesButton.UseVisualStyleBackColor = true;
-            this.moreYesButton.Visible = false;
             this.moreYesButton.Click += new System.EventHandler(this.moreYesButton_Click);
             // 
             // yesButton
             // 
+            this.yesButton.Enabled = false;
             this.yesButton.Location = new System.Drawing.Point(712, 123);
             this.yesButton.Name = "yesButton";
             this.yesButton.Size = new System.Drawing.Size(75, 23);
             this.yesButton.TabIndex = 11;
             this.yesButton.Text = "Yes";
             this.yesButton.UseVisualStyleBackColor = true;
-            this.yesButton.Visible = false;
             this.yesButton.Click += new System.EventHandler(this.yesButton_Click);
             // 
             // Form1

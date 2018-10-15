@@ -1,6 +1,5 @@
 ﻿using System;
 using System.IO;
-using System.Linq;
 using System.Text;
 using System.Windows.Forms;
 using SAIExpertSystem.Parsing;
@@ -16,6 +15,7 @@ namespace SAIExpertSystem
         private KnowledgeBase knowledgeBase;
         private int questionCount;
         private bool isStarted;
+        private bool isButtonsActive;
         Recalculate recalc = new Recalculate();
         Question questionWriter = new Question();
         Hypotheses hypothesesWriter = new Hypotheses();
@@ -73,32 +73,21 @@ namespace SAIExpertSystem
 
         private void startButton_Click(object sender, EventArgs e)
         {
-            if (isStarted)
+            if (headerTextBox.Text == "")
             {
-                MessageBox.Show("Пожалуйста, завершите или отмените текущую консультацию.");
+                MessageBox.Show("Для начала консультации загрузите базу знаний.");
             }
             else
             {
-                if (headerTextBox.Text == "")
-                {
-                    MessageBox.Show("Для начала консультации загрузите базу знаний.");
-                }
-                else
-                {
-                    questionCount = 0;
-                    isStarted = true;
+                questionCount = 0;
+                isStarted = true;
+                isButtonsActive = false;
 
-                    noButton.Visible = true;
-                    moreNoButton.Visible = true;
-                    dunnoButton.Visible = true;
-                    moreYesButton.Visible = true;
-                    yesButton.Visible = true;
-
-                    isStarted = questionWriter.Current(isStarted, currentQuestionTextBox, questionCount, knowledgeBase);
-                    questionCount++;
-                    questionWriter.All(questionTextBox, questionCount, knowledgeBase);
-                }
-                Console.WriteLine(questionTextBox.Text);
+                isButtonsActive = questionWriter.Current(isButtonsActive, isStarted, currentQuestionTextBox, questionCount, knowledgeBase).Item1;
+                isStarted = questionWriter.Current(isButtonsActive, isStarted, currentQuestionTextBox, questionCount, knowledgeBase).Item2;
+                ButtonSwitcher(isButtonsActive, isStarted);
+                questionCount++;
+                questionWriter.All(questionTextBox, questionCount, knowledgeBase);
             }
         }
 
@@ -110,13 +99,10 @@ namespace SAIExpertSystem
             }
             else
             {
-                noButton.Visible = false;
-                moreNoButton.Visible = false;
-                dunnoButton.Visible = false;
-                moreYesButton.Visible = false;
-                yesButton.Visible = false;
-
+                isButtonsActive = true;
                 isStarted = false;
+                ButtonSwitcher(isButtonsActive, isStarted);
+
                 questionCount = 0;
                 headerTextBox.ResetText();
                 questionTextBox.ResetText();
@@ -133,7 +119,10 @@ namespace SAIExpertSystem
 
             knowledgeBase = recalc.No(currQuestion, knowledgeBase);
 
-            isStarted = questionWriter.Current(isStarted, currentQuestionTextBox, questionCount, knowledgeBase);
+            Tuple<bool, bool > flags = questionWriter.Current(isButtonsActive, isStarted, currentQuestionTextBox, questionCount, knowledgeBase);
+            isButtonsActive = flags.Item1;
+            isStarted = flags.Item2;
+            ButtonSwitcher(isButtonsActive, isStarted);
             questionCount++;
 
             questionWriter.All(questionTextBox, questionCount, knowledgeBase);
@@ -148,7 +137,10 @@ namespace SAIExpertSystem
 
             knowledgeBase = recalc.MoreNo(currQuestion, knowledgeBase);
 
-            isStarted = questionWriter.Current(isStarted, currentQuestionTextBox, questionCount, knowledgeBase);
+            Tuple<bool, bool> flags = questionWriter.Current(isButtonsActive, isStarted, currentQuestionTextBox, questionCount, knowledgeBase);
+            isButtonsActive = flags.Item1;
+            ButtonSwitcher(isButtonsActive, isStarted);
+            isStarted = flags.Item2;
             questionCount++;
 
             questionWriter.All(questionTextBox, questionCount, knowledgeBase);
@@ -162,7 +154,10 @@ namespace SAIExpertSystem
 
             knowledgeBase = recalc.Dunno(knowledgeBase);
 
-            isStarted = questionWriter.Current(isStarted, currentQuestionTextBox, questionCount, knowledgeBase);
+            Tuple<bool, bool> flags = questionWriter.Current(isButtonsActive, isStarted, currentQuestionTextBox, questionCount, knowledgeBase);
+            isButtonsActive = flags.Item1;
+            isStarted = flags.Item2;
+            ButtonSwitcher(isButtonsActive, isStarted);
             questionCount++;
 
             questionWriter.All(questionTextBox, questionCount, knowledgeBase);
@@ -177,7 +172,10 @@ namespace SAIExpertSystem
 
             knowledgeBase = recalc.MoreYes(currQuestion, knowledgeBase);
 
-            isStarted = questionWriter.Current(isStarted, currentQuestionTextBox, questionCount, knowledgeBase);
+            Tuple<bool, bool> flags = questionWriter.Current(isButtonsActive, isStarted, currentQuestionTextBox, questionCount, knowledgeBase);
+            isButtonsActive = flags.Item1;
+            isStarted = flags.Item2;
+            ButtonSwitcher(isButtonsActive, isStarted);
             questionCount++;
 
             questionWriter.All(questionTextBox, questionCount, knowledgeBase);
@@ -193,12 +191,45 @@ namespace SAIExpertSystem
 
             knowledgeBase = recalc.Yes(currQuestion, knowledgeBase);
 
-            isStarted = questionWriter.Current(isStarted, currentQuestionTextBox, questionCount, knowledgeBase);
+            Tuple<bool, bool> flags = questionWriter.Current(isButtonsActive, isStarted, currentQuestionTextBox, questionCount, knowledgeBase);
+            isButtonsActive = flags.Item1;
+            isStarted = flags.Item2;
+            ButtonSwitcher(isButtonsActive, isStarted);
             questionCount++;
 
             questionWriter.All(questionTextBox, questionCount, knowledgeBase);
 
             hypothesesWriter.WriteHypotheses(hypothesesTextBox, knowledgeBase);
+        }
+
+        private void ButtonSwitcher(bool isButtonsActive, bool isStarted)
+        {
+            if (isStarted)
+            {
+                startButton.Enabled = false;
+            }
+            else
+            {
+                startButton.Enabled = false;
+                stopButton.Enabled = false;
+            }
+
+            if (isButtonsActive)
+            {
+                noButton.Enabled = false;
+                moreNoButton.Enabled = false;
+                dunnoButton.Enabled = false;
+                moreYesButton.Enabled = false;
+                yesButton.Enabled = false;
+            }
+            else
+            {
+                noButton.Enabled = true;
+                moreNoButton.Enabled = true;
+                dunnoButton.Enabled = true;
+                moreYesButton.Enabled = true;
+                yesButton.Enabled = true;
+            }
         }
     }
 }

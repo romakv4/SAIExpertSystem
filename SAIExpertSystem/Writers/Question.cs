@@ -6,7 +6,7 @@ namespace SAIExpertSystem.Writers
 {
     public class Question
     {
-        public bool Current(bool isStarted, TextBox currentQuestionTextBox, int questionCount, KnowledgeBase knowledgeBase)
+        public Tuple<bool, bool> Current(bool isButtonsActive, bool isStarted, TextBox currentQuestionTextBox, int questionCount, KnowledgeBase knowledgeBase)
         {
             if (questionCount < knowledgeBase.questions.Count)
             {
@@ -16,11 +16,12 @@ namespace SAIExpertSystem.Writers
             {
                 currentQuestionTextBox.Text = knowledgeBase.questions[questionCount - 1];
                 currentQuestionTextBox.ResetText();
+                isButtonsActive = true;
                 isStarted = false;
                 MessageBox.Show("Консультация завершена.");
             }
 
-            return isStarted;
+            return Tuple.Create(isButtonsActive, isStarted);
         }
 
         public void All(TextBox questionTextBox, int questionCount, KnowledgeBase knowledgeBase)
