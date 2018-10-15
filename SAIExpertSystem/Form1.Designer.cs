@@ -28,6 +28,7 @@
         /// </summary>
         private void InitializeComponent()
         {
+            System.ComponentModel.ComponentResourceManager resources = new System.ComponentModel.ComponentResourceManager(typeof(Form1));
             this.openFileButton = new System.Windows.Forms.Button();
             this.headerTextBox = new System.Windows.Forms.TextBox();
             this.questionTextBox = new System.Windows.Forms.TextBox();
@@ -40,6 +41,8 @@
             this.dunnoButton = new System.Windows.Forms.Button();
             this.moreYesButton = new System.Windows.Forms.Button();
             this.yesButton = new System.Windows.Forms.Button();
+            this.pictureBox = new System.Windows.Forms.PictureBox();
+            ((System.ComponentModel.ISupportInitialize)(this.pictureBox)).BeginInit();
             this.SuspendLayout();
             // 
             // openFileButton
@@ -167,11 +170,21 @@
             this.yesButton.UseVisualStyleBackColor = true;
             this.yesButton.Click += new System.EventHandler(this.yesButton_Click);
             // 
+            // pictureBox
+            // 
+            this.pictureBox.Image = ((System.Drawing.Image)(resources.GetObject("pictureBox.Image")));
+            this.pictureBox.Location = new System.Drawing.Point(330, 153);
+            this.pictureBox.Name = "pictureBox";
+            this.pictureBox.Size = new System.Drawing.Size(458, 285);
+            this.pictureBox.TabIndex = 12;
+            this.pictureBox.TabStop = false;
+            // 
             // Form1
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
             this.ClientSize = new System.Drawing.Size(800, 450);
+            this.Controls.Add(this.pictureBox);
             this.Controls.Add(this.yesButton);
             this.Controls.Add(this.moreYesButton);
             this.Controls.Add(this.dunnoButton);
@@ -188,6 +201,7 @@
             this.MaximizeBox = false;
             this.Name = "Form1";
             this.Text = "Form1";
+            ((System.ComponentModel.ISupportInitialize)(this.pictureBox)).EndInit();
             this.ResumeLayout(false);
             this.PerformLayout();
 
@@ -207,6 +221,7 @@
         private System.Windows.Forms.Button dunnoButton;
         private System.Windows.Forms.Button moreYesButton;
         private System.Windows.Forms.Button yesButton;
+        private System.Windows.Forms.PictureBox pictureBox;
     }
 }
 
