@@ -1,8 +1,9 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 
 namespace SAIExpertSystem.Parsing
 {
-    public class Hypothese
+    public class Hypothesis
     {
         public string name;
         public double aprioriProbability;

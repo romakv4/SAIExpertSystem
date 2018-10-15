@@ -1,8 +1,11 @@
 ﻿using System;
 using System.IO;
+using System.Linq;
 using System.Text;
 using System.Windows.Forms;
 using SAIExpertSystem.Parsing;
+using SAIExpertSystem.Recalculating;
+using SAIExpertSystem.Writers;
 
 namespace SAIExpertSystem
 {
@@ -11,8 +14,11 @@ namespace SAIExpertSystem
         OpenFileDialog openFileDialog = new OpenFileDialog();
         private string[] mkb;
         private KnowledgeBase knowledgeBase;
-        private int questionCount = 0;
-        private bool isStarted = false;
+        private int questionCount;
+        private bool isStarted;
+        Recalculate recalc = new Recalculate();
+        Question questionWriter = new Question();
+        Hypotheses hypothesesWriter = new Hypotheses();
 
         public Form1()
         {
@@ -39,18 +45,21 @@ namespace SAIExpertSystem
                     var calcData = knowledgeBase.calcData;
                     for (int i = 0; i < header.Count; i++)
                     {
-                        headerTextBox.AppendText(header[i] + "\n");
+                        headerTextBox.AppendText(header[i] + Environment.NewLine);
                     }
 
                     for (int i = 0; i < questions.Count; i++)
                     {
-                        questionTextBox.AppendText(questions[i] + "\n");
+                        questionTextBox.AppendText(questions[i] + Environment.NewLine);
                     }
 
                     for (int i = 0; i < calcData.Count; i++)
                     {
-                        hypothesesTextBox.AppendText(calcData[i].name + " " + calcData[i].aprioriProbability + "\n");
+                        hypothesesTextBox.AppendText(calcData[i].name + " " + calcData[i].aprioriProbability + Environment.NewLine);
                     }
+
+                    startButton.Enabled = true;
+                    stopButton.Enabled = true;
                 }
                 else
                 {
@@ -76,22 +85,20 @@ namespace SAIExpertSystem
                 }
                 else
                 {
+                    questionCount = 0;
+                    isStarted = true;
+
                     noButton.Visible = true;
                     moreNoButton.Visible = true;
                     dunnoButton.Visible = true;
                     moreYesButton.Visible = true;
                     yesButton.Visible = true;
 
-                    var questions = knowledgeBase.questions;
-                    currentQuestionTextBox.Text = questions[questionCount];
-                    questionTextBox.Text = "";
-                    isStarted = true;
+                    isStarted = questionWriter.Current(isStarted, currentQuestionTextBox, questionCount, knowledgeBase);
                     questionCount++;
-                    for (int i = questionCount; i < questions.Count; i++)
-                    {
-                        questionTextBox.AppendText(questions[i] + "\n");
-                    }
+                    questionWriter.All(questionTextBox, questionCount, knowledgeBase);
                 }
+                Console.WriteLine(questionTextBox.Text);
             }
         }
 
@@ -121,292 +128,77 @@ namespace SAIExpertSystem
 
         private void noButton_Click(object sender, EventArgs e)
         {
-            if (questionCount < knowledgeBase.questions.Count)
-            {
-                hypothesesTextBox.ResetText();
-                for (int i = 0; i < knowledgeBase.calcData.Count; i++)
-                {
-                    double aprioryProb = knowledgeBase.calcData[i].aprioriProbability;
-                    double probIncrease = knowledgeBase.calcData[i].probabilities[knowledgeBase.questions.IndexOf(currentQuestionTextBox.Text)].probIncrease;
-                    double probDecrease = knowledgeBase.calcData[i].probabilities[knowledgeBase.questions.IndexOf(currentQuestionTextBox.Text)].probDecrease;
+            hypothesesTextBox.ResetText();
+            String currQuestion = currentQuestionTextBox.Text;
 
-                    double aprProb = ((1 - probIncrease) * aprioryProb) /
-                                  ((1 - probIncrease) * aprioryProb + (1 - probDecrease) * (1 - aprioryProb));
+            knowledgeBase = recalc.No(currQuestion, knowledgeBase);
 
-                    knowledgeBase.calcData[i].aprioriProbability = aprProb;
-                    String name = knowledgeBase.calcData[i].name;
-                    String prob = knowledgeBase.calcData[i].aprioriProbability.ToString("N5");
-                    hypothesesTextBox.AppendText(name + " " + prob + "\n");
-                }
-                currentQuestionTextBox.Text = knowledgeBase.questions[questionCount];
-                questionTextBox.Text = "";
-                questionCount++;
-                for (int j = questionCount; j < knowledgeBase.questions.Count; j++)
-                {
-                    questionTextBox.AppendText(knowledgeBase.questions[j] + "\n");
-                }
-            }
-            else
-            {
-                hypothesesTextBox.ResetText();
-                for (int i = 0; i < knowledgeBase.calcData.Count; i++)
-                {
-                    double aprioryProb = knowledgeBase.calcData[i].aprioriProbability;
-                    double probIncrease = knowledgeBase.calcData[i].probabilities[knowledgeBase.questions.IndexOf(currentQuestionTextBox.Text)].probIncrease;
-                    double probDecrease = knowledgeBase.calcData[i].probabilities[knowledgeBase.questions.IndexOf(currentQuestionTextBox.Text)].probDecrease;
+            isStarted = questionWriter.Current(isStarted, currentQuestionTextBox, questionCount, knowledgeBase);
+            questionCount++;
 
-                    double aprProb = ((1 - probIncrease) * aprioryProb) /
-                                  ((1 - probIncrease) * aprioryProb + (1 - probDecrease) * (1 - aprioryProb));
-
-                    knowledgeBase.calcData[i].aprioriProbability = aprProb;
-                    String name = knowledgeBase.calcData[i].name;
-                    String prob = knowledgeBase.calcData[i].aprioriProbability.ToString("N5");
-                    hypothesesTextBox.AppendText(name + " " + prob + "\n");
-                }
-                currentQuestionTextBox.Text = knowledgeBase.questions[questionCount-1];
-                questionTextBox.Text = "";
-                questionCount++;
-                for (int j = questionCount; j < knowledgeBase.questions.Count; j++)
-                {
-                    questionTextBox.AppendText(knowledgeBase.questions[j] + "\n");
-                }
-                currentQuestionTextBox.ResetText();
-                isStarted = false;
-                questionCount = 0;
-                MessageBox.Show("Консультация завершена.");
-            }
+            questionWriter.All(questionTextBox, questionCount, knowledgeBase);
+            
+            hypothesesWriter.WriteHypotheses(hypothesesTextBox, knowledgeBase);
         }
 
         private void moreNoButton_Click(object sender, EventArgs e)
         {
-            if (questionCount < knowledgeBase.questions.Count)
-            {
-                hypothesesTextBox.ResetText();
-                for (int i = 0; i < knowledgeBase.calcData.Count; i++)
-                {
-                    double aprioryProb = knowledgeBase.calcData[i].aprioriProbability;
-                    double probIncrease = knowledgeBase.calcData[i].probabilities[knowledgeBase.questions.IndexOf(currentQuestionTextBox.Text)].probIncrease;
-                    double probDecrease = knowledgeBase.calcData[i].probabilities[knowledgeBase.questions.IndexOf(currentQuestionTextBox.Text)].probDecrease;
+            hypothesesTextBox.ResetText();
+            String currQuestion = currentQuestionTextBox.Text;
 
-                    double no = ((1 - probIncrease) * aprioryProb) /
-                                  ((1 - probIncrease) * aprioryProb + (1 - probDecrease) * (1 - aprioryProb));
-                    double aprProb = no + (((0.25) * (aprioryProb - no)) / (0.5));
+            knowledgeBase = recalc.MoreNo(currQuestion, knowledgeBase);
 
-                    knowledgeBase.calcData[i].aprioriProbability = aprProb;
-                    String name = knowledgeBase.calcData[i].name;
-                    String prob = knowledgeBase.calcData[i].aprioriProbability.ToString("N5");
-                    hypothesesTextBox.AppendText(name + " " + prob + "\n");
-                }
-                currentQuestionTextBox.Text = knowledgeBase.questions[questionCount];
-                questionTextBox.Text = "";
-                questionCount++;
-                for (int j = questionCount; j < knowledgeBase.questions.Count; j++)
-                {
-                    questionTextBox.AppendText(knowledgeBase.questions[j] + "\n");
-                }
-            }
-            else
-            {
-                hypothesesTextBox.ResetText();
-                for (int i = 0; i < knowledgeBase.calcData.Count; i++)
-                {
-                    double aprioryProb = knowledgeBase.calcData[i].aprioriProbability;
-                    double probIncrease = knowledgeBase.calcData[i].probabilities[knowledgeBase.questions.IndexOf(currentQuestionTextBox.Text)].probIncrease;
-                    double probDecrease = knowledgeBase.calcData[i].probabilities[knowledgeBase.questions.IndexOf(currentQuestionTextBox.Text)].probDecrease;
+            isStarted = questionWriter.Current(isStarted, currentQuestionTextBox, questionCount, knowledgeBase);
+            questionCount++;
 
-                    double no = ((1 - probIncrease) * aprioryProb) /
-                                  ((1 - probIncrease) * aprioryProb + (1 - probDecrease) * (1 - aprioryProb));
-                    double aprProb = no + (((0.25) * (aprioryProb - no)) / (0.5));
+            questionWriter.All(questionTextBox, questionCount, knowledgeBase);
 
-                    knowledgeBase.calcData[i].aprioriProbability = aprProb;
-                    String name = knowledgeBase.calcData[i].name;
-                    String prob = knowledgeBase.calcData[i].aprioriProbability.ToString("N5");
-                    hypothesesTextBox.AppendText(name + " " + prob + "\n");
-                }
-                currentQuestionTextBox.Text = knowledgeBase.questions[questionCount-1];
-                questionTextBox.Text = "";
-                questionCount++;
-                for (int j = questionCount; j < knowledgeBase.questions.Count; j++)
-                {
-                    questionTextBox.AppendText(knowledgeBase.questions[j] + "\n");
-                }
-                currentQuestionTextBox.ResetText();
-                isStarted = false;
-                questionCount = 0;
-                MessageBox.Show("Консультация завершена.");
-            }
+            hypothesesWriter.WriteHypotheses(hypothesesTextBox, knowledgeBase);
         }
 
         private void dunnoButton_Click(object sender, EventArgs e)
         {
-            if (questionCount < knowledgeBase.questions.Count)
-            {
-                hypothesesTextBox.ResetText();
-                for (int i = 0; i < knowledgeBase.calcData.Count; i++)
-                {
-                    double aprioryProb = knowledgeBase.calcData[i].aprioriProbability;
-                    double aprProb = aprioryProb;
+            hypothesesTextBox.ResetText();
 
-                    knowledgeBase.calcData[i].aprioriProbability = aprProb;
-                    String name = knowledgeBase.calcData[i].name;
-                    String prob = knowledgeBase.calcData[i].aprioriProbability.ToString("N5");
-                    hypothesesTextBox.AppendText(name + " " + prob + "\n");
-                }
-                currentQuestionTextBox.Text = knowledgeBase.questions[questionCount];
-                questionTextBox.Text = "";
-                questionCount++;
-                for (int j = questionCount; j < knowledgeBase.questions.Count; j++)
-                {
-                    questionTextBox.AppendText(knowledgeBase.questions[j] + "\n");
-                }
-            }
-            else
-            {
-                hypothesesTextBox.ResetText();
-                for (int i = 0; i < knowledgeBase.calcData.Count; i++)
-                {
-                    double aprioryProb = knowledgeBase.calcData[i].aprioriProbability;
-                    double aprProb = aprioryProb;
+            knowledgeBase = recalc.Dunno(knowledgeBase);
 
-                    knowledgeBase.calcData[i].aprioriProbability = aprProb;
-                    String name = knowledgeBase.calcData[i].name;
-                    String prob = knowledgeBase.calcData[i].aprioriProbability.ToString("N5");
-                    hypothesesTextBox.AppendText(name + " " + prob + "\n");
-                }
-                currentQuestionTextBox.Text = knowledgeBase.questions[questionCount-1];
-                questionTextBox.Text = "";
-                questionCount++;
-                for (int j = questionCount; j < knowledgeBase.questions.Count; j++)
-                {
-                    questionTextBox.AppendText(knowledgeBase.questions[j] + "\n");
-                }
-                currentQuestionTextBox.ResetText();
-                isStarted = false;
-                questionCount = 0;
-                MessageBox.Show("Консультация завершена.");
-            }
+            isStarted = questionWriter.Current(isStarted, currentQuestionTextBox, questionCount, knowledgeBase);
+            questionCount++;
+
+            questionWriter.All(questionTextBox, questionCount, knowledgeBase);
+
+            hypothesesWriter.WriteHypotheses(hypothesesTextBox, knowledgeBase);
         }
 
         private void moreYesButton_Click(object sender, EventArgs e)
         {
-            if (questionCount < knowledgeBase.questions.Count)
-            {
-                hypothesesTextBox.ResetText();
-                for (int i = 0; i < knowledgeBase.calcData.Count; i++)
-                {
-                    double aprioryProb = knowledgeBase.calcData[i].aprioriProbability;
-                    double probIncrease = knowledgeBase.calcData[i].probabilities[knowledgeBase.questions.IndexOf(currentQuestionTextBox.Text)].probIncrease;
-                    double probDecrease = knowledgeBase.calcData[i].probabilities[knowledgeBase.questions.IndexOf(currentQuestionTextBox.Text)].probDecrease;
+            hypothesesTextBox.ResetText();
+            String currQuestion = currentQuestionTextBox.Text;
 
-                    double yes = ((1 - probIncrease) * aprioryProb) /
-                                  ((1 - probIncrease) * aprioryProb + (1 - probDecrease) * (1 - aprioryProb));
-                    double aprProb = aprioryProb + (((0.25) * (yes - aprioryProb)) / (0.5));
+            knowledgeBase = recalc.MoreYes(currQuestion, knowledgeBase);
 
-                    knowledgeBase.calcData[i].aprioriProbability = aprProb;
-                    String name = knowledgeBase.calcData[i].name;
-                    String prob = knowledgeBase.calcData[i].aprioriProbability.ToString("N5");
-                    hypothesesTextBox.AppendText(name + " " + prob + "\n");
-                }
-                currentQuestionTextBox.Text = knowledgeBase.questions[questionCount];
-                questionTextBox.Text = "";
-                questionCount++;
-                for (int j = questionCount; j < knowledgeBase.questions.Count; j++)
-                {
-                    questionTextBox.AppendText(knowledgeBase.questions[j] + "\n");
-                }
-            }
-            else
-            {
-                hypothesesTextBox.ResetText();
-                for (int i = 0; i < knowledgeBase.calcData.Count; i++)
-                {
-                    double aprioryProb = knowledgeBase.calcData[i].aprioriProbability;
-                    double probIncrease = knowledgeBase.calcData[i].probabilities[knowledgeBase.questions.IndexOf(currentQuestionTextBox.Text)].probIncrease;
-                    double probDecrease = knowledgeBase.calcData[i].probabilities[knowledgeBase.questions.IndexOf(currentQuestionTextBox.Text)].probDecrease;
+            isStarted = questionWriter.Current(isStarted, currentQuestionTextBox, questionCount, knowledgeBase);
+            questionCount++;
 
-                    double yes = (probIncrease * aprioryProb) / (
-                                  (probIncrease * aprioryProb) + (probDecrease * (1 - aprioryProb)));
-                    double aprProb = aprioryProb + (((0.25) * (yes - aprioryProb)) / (0.5));
+            questionWriter.All(questionTextBox, questionCount, knowledgeBase);
 
-                    knowledgeBase.calcData[i].aprioriProbability = aprProb;
-                    String name = knowledgeBase.calcData[i].name;
-                    String prob = knowledgeBase.calcData[i].aprioriProbability.ToString("N5");
-                    hypothesesTextBox.AppendText(name + " " + prob + "\n");
-                }
-                currentQuestionTextBox.Text = knowledgeBase.questions[questionCount-1];
-                questionTextBox.Text = "";
-                questionCount++;
-                for (int j = questionCount; j < knowledgeBase.questions.Count; j++)
-                {
-                    questionTextBox.AppendText(knowledgeBase.questions[j] + "\n");
-                }
-                currentQuestionTextBox.ResetText();
-                isStarted = false;
-                questionCount = 0;
-                MessageBox.Show("Консультация завершена.");
-            }
+            hypothesesWriter.WriteHypotheses(hypothesesTextBox, knowledgeBase);
+
         }
 
         private void yesButton_Click(object sender, EventArgs e)
         {
-            if (questionCount < knowledgeBase.questions.Count)
-            {
-                hypothesesTextBox.ResetText();
-                for (int i = 0; i < knowledgeBase.calcData.Count; i++)
-                {
-                    Console.WriteLine(knowledgeBase.calcData[i].name);
-                    Console.WriteLine(knowledgeBase.calcData[i].aprioriProbability);
-                    Console.WriteLine(knowledgeBase.calcData[i].probabilities[knowledgeBase.questions.IndexOf(currentQuestionTextBox.Text)].probIncrease);
-                    Console.WriteLine(knowledgeBase.calcData[i].probabilities[knowledgeBase.questions.IndexOf(currentQuestionTextBox.Text)].probDecrease);
-                    double aprioryProb = knowledgeBase.calcData[i].aprioriProbability;
-                    double probIncrease = knowledgeBase.calcData[i].probabilities[knowledgeBase.questions.IndexOf(currentQuestionTextBox.Text)].probIncrease;
-                    double probDecrease = knowledgeBase.calcData[i].probabilities[knowledgeBase.questions.IndexOf(currentQuestionTextBox.Text)].probDecrease;
+            hypothesesTextBox.ResetText();
+            String currQuestion = currentQuestionTextBox.Text;
 
-                    double aprProb = (probIncrease * aprioryProb) / (
-                                      (probIncrease * aprioryProb) + (probDecrease * (1 - aprioryProb)));
+            knowledgeBase = recalc.Yes(currQuestion, knowledgeBase);
 
-                    knowledgeBase.calcData[i].aprioriProbability = aprProb;
-                    String name = knowledgeBase.calcData[i].name;
-                    String prob = knowledgeBase.calcData[i].aprioriProbability.ToString("N5");
-                    hypothesesTextBox.AppendText(name + " " + prob + "\n");
-                }
-                currentQuestionTextBox.Text = knowledgeBase.questions[questionCount];
-                questionTextBox.Text = "";
-                questionCount++;
-                for (int j = questionCount; j < knowledgeBase.questions.Count; j++)
-                {
-                    questionTextBox.AppendText(knowledgeBase.questions[j] + "\n");
-                }
-            }
-            else
-            {
-                hypothesesTextBox.ResetText();
-                for (int i = 0; i < knowledgeBase.calcData.Count; i++)
-                {
-                    double aprioryProb = knowledgeBase.calcData[i].aprioriProbability;
-                    double probIncrease = knowledgeBase.calcData[i].probabilities[knowledgeBase.questions.IndexOf(currentQuestionTextBox.Text)].probIncrease;
-                    double probDecrease = knowledgeBase.calcData[i].probabilities[knowledgeBase.questions.IndexOf(currentQuestionTextBox.Text)].probDecrease;
+            isStarted = questionWriter.Current(isStarted, currentQuestionTextBox, questionCount, knowledgeBase);
+            questionCount++;
 
-                    double aprProb = (probIncrease * aprioryProb) / (
-                                      (probIncrease * aprioryProb) + (probDecrease * (1 - aprioryProb)));
+            questionWriter.All(questionTextBox, questionCount, knowledgeBase);
 
-                    knowledgeBase.calcData[i].aprioriProbability = aprProb;
-                    String name = knowledgeBase.calcData[i].name;
-                    String prob = knowledgeBase.calcData[i].aprioriProbability.ToString("N5");
-                    hypothesesTextBox.AppendText(name + " " + prob + "\n");
-                }
-                currentQuestionTextBox.Text = knowledgeBase.questions[questionCount-1];
-                questionTextBox.Text = "";
-                questionCount++;
-                for (int j = questionCount; j < knowledgeBase.questions.Count; j++)
-                {
-                    questionTextBox.AppendText(knowledgeBase.questions[j] + "\n");
-                }
-                currentQuestionTextBox.ResetText();
-                isStarted = false;
-                questionCount = 0;
-                MessageBox.Show("Консультация завершена.");
-            }
+            hypothesesWriter.WriteHypotheses(hypothesesTextBox, knowledgeBase);
         }
     }
 }

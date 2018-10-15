@@ -48,7 +48,7 @@ namespace SAIExpertSystem.Parsing
             {
                 string hypothese = mkb[i];
                 hypothese = Regex.Replace(hypothese, "[0-9,.]", "").Trim();
-                Hypothese hyp = new Hypothese();
+                Hypothesis hyp = new Hypothesis();
                 hyp.name = hypothese;
 
                 string aprioryProb = mkb[i];

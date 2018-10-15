@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 
 namespace SAIExpertSystem.Parsing
 {
@@ -6,6 +7,6 @@ namespace SAIExpertSystem.Parsing
     {
         public List<string> header = new List<string>();
         public List<string> questions = new List<string>();
-        public List<Hypothese> calcData = new List<Hypothese>();
+        public List<Hypothesis> calcData = new List<Hypothesis>();
     }
 }

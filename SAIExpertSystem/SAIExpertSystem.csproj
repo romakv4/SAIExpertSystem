@@ -51,12 +51,15 @@
     <Compile Include="Form1.Designer.cs">
       <DependentUpon>Form1.cs</DependentUpon>
     </Compile>
-    <Compile Include="KnowledgeBase\Hypothese.cs" />
+    <Compile Include="KnowledgeBase\Hypothesis.cs" />
     <Compile Include="KnowledgeBase\KnowledgeBase.cs" />
     <Compile Include="KnowledgeBase\Probabilities.cs" />
     <Compile Include="Parsing\Parsing.cs" />
     <Compile Include="Program.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
+    <Compile Include="Recalculating\Recalculate.cs" />
+    <Compile Include="Writers\Hypotheses.cs" />
+    <Compile Include="Writers\Question.cs" />
     <EmbeddedResource Include="Form1.resx">
       <DependentUpon>Form1.cs</DependentUpon>
     </EmbeddedResource>
