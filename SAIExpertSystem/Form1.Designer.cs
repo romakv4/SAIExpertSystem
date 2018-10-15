@@ -184,6 +184,8 @@
             this.Controls.Add(this.questionTextBox);
             this.Controls.Add(this.headerTextBox);
             this.Controls.Add(this.openFileButton);
+            this.FormBorderStyle = System.Windows.Forms.FormBorderStyle.Fixed3D;
+            this.MaximizeBox = false;
             this.Name = "Form1";
             this.Text = "Form1";
             this.ResumeLayout(false);
